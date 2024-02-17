@@ -98,7 +98,7 @@ resource "azurerm_mysql_flexible_server" "default" {
   delegated_subnet_id          = azurerm_subnet.default.id
   geo_redundant_backup_enabled = false
   private_dns_zone_id          = azurerm_private_dns_zone.default.id
-  sku_name                     = "GP_Standard_D2ds_v4"
+  sku_name                     = "Standard_B1s"
   version                      = "8.0.21"
 
   high_availability {
