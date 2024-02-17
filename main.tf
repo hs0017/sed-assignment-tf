@@ -4,39 +4,6 @@ resource "azurerm_resource_group" "rg" {
   location = "uksouth"
 }
 
-# Create the Linux App Service Plan
-resource "azurerm_service_plan" "appserviceplan" {
-  name                = "surreylm-app-plan"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  os_type             = "Linux"
-  sku_name            = "B1"
-}
-
-# Create prod app
-resource "azurerm_linux_web_app" "webapp" {
-  name                  = "surreylm-prod-app"
-  location              = azurerm_resource_group.rg.location
-  resource_group_name   = azurerm_resource_group.rg.name
-  service_plan_id       = azurerm_service_plan.appserviceplan.id
-  https_only            = true
-  site_config { 
-    minimum_tls_version = "1.2"
-  }
-}
-
-# Create test app
-resource "azurerm_linux_web_app" "webapp" {
-  name                  = "surreylm-test-app"
-  location              = azurerm_resource_group.rg.location
-  resource_group_name   = azurerm_resource_group.rg.name
-  service_plan_id       = azurerm_service_plan.appserviceplan.id
-  https_only            = true
-  site_config { 
-    minimum_tls_version = "1.2"
-  }
-}
-
 # Generate random value for the name
 resource "random_string" "name" {
   length  = 8
@@ -88,6 +55,22 @@ resource "azurerm_subnet" "default" {
   }
 }
 
+resource "azurerm_subnet" "sn1" {
+  name                 = "surreylm-prod-subnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.default.name
+  address_prefixes     = ["10.0.1.0/24"]
+
+  delegation {
+    name = "example-delegation"
+
+    service_delegation {
+      name    = "Microsoft.Web/serverFarms"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
+}
+
 # Enables you to manage Private DNS zones within Azure DNS
 resource "azurerm_private_dns_zone" "default" {
   name                = "surreylm-db.mysql.database.azure.com"
@@ -132,4 +115,30 @@ resource "azurerm_mysql_flexible_server" "default" {
   }
 
   depends_on = [azurerm_private_dns_zone_virtual_network_link.default]
+}
+
+# Create the Linux App Service Plan
+resource "azurerm_service_plan" "appserviceplan" {
+  name                = "surreylm-app-plan"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  os_type             = "Linux"
+  sku_name            = "B1"
+}
+
+# Create prod app
+resource "azurerm_linux_web_app" "webapp" {
+  name                  = "surreylm-prod-app"
+  location              = azurerm_resource_group.rg.location
+  resource_group_name   = azurerm_resource_group.rg.name
+  service_plan_id       = azurerm_service_plan.appserviceplan.id
+  https_only            = true
+  site_config { 
+    minimum_tls_version = "1.2"
+  }
+}
+
+resource "azurerm_app_service_virtual_network_swift_connection" "vnsc" {
+  app_service_id = azurerm_app_service.webapp.id
+  subnet_id      = azurerm_subnet.sn1.id
 }
