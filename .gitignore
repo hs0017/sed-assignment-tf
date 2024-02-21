@@ -1,0 +1,6 @@
+.terraform.lock.hcl
+main.tfplan
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/providers/registry.terraform.io/hashicorp/azurerm/3.92.0/darwin_amd64/terraform-provider-azurerm_v3.92.0_x5
+.terraform/providers/registry.terraform.io/hashicorp/random/3.6.0/darwin_amd64/terraform-provider-random_v3.6.0_x5

@@ -73,7 +73,7 @@ resource "azurerm_subnet" "sn1" {
 
 # Enables you to manage Private DNS zones within Azure DNS
 resource "azurerm_private_dns_zone" "default" {
-  name                = "surreylm-db.mysql.database.azure.com"
+  name                = "surreylm.mysql.database.azure.com"
   resource_group_name = azurerm_resource_group.rg.name
 }
 
@@ -92,23 +92,14 @@ resource "azurerm_mysql_flexible_server" "default" {
   location                     = azurerm_resource_group.rg.location
   name                         = "surreylm-db"
   resource_group_name          = azurerm_resource_group.rg.name
-  administrator_login          = surreylm-admin
+  administrator_login          = "surreylm_admin"
   administrator_password       = random_password.password.result
   backup_retention_days        = 7
   delegated_subnet_id          = azurerm_subnet.default.id
   geo_redundant_backup_enabled = false
   private_dns_zone_id          = azurerm_private_dns_zone.default.id
-  sku_name                     = "Standard_B1s"
+  sku_name                     = "B_Standard_B1s"
   version                      = "8.0.21"
-
-  high_availability {
-    mode                      = "SameZone"
-  }
-  maintenance_window {
-    day_of_week  = 0
-    start_hour   = 8
-    start_minute = 0
-  }
   storage {
     iops    = 360
     size_gb = 20
@@ -138,7 +129,7 @@ resource "azurerm_linux_web_app" "webapp" {
   }
 }
 
-resource "azurerm_app_service_virtual_network_swift_connection" "vnsc" {
-  app_service_id = azurerm_app_service.webapp.id
+resource "azurerm_app_service_virtual_network_swift_connection" "vnint" {
+  app_service_id = azurerm_linux_web_app.webapp.id
   subnet_id      = azurerm_subnet.sn1.id
 }
