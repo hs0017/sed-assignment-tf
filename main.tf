@@ -133,3 +133,20 @@ resource "azurerm_app_service_virtual_network_swift_connection" "vnint" {
   app_service_id = azurerm_linux_web_app.webapp.id
   subnet_id      = azurerm_subnet.sn1.id
 }
+
+# Create dev app
+resource "azurerm_linux_web_app" "webapp2" {
+  name                  = "surreylm-dev-app"
+  location              = azurerm_resource_group.rg.location
+  resource_group_name   = azurerm_resource_group.rg.name
+  service_plan_id       = azurerm_service_plan.appserviceplan.id
+  https_only            = true
+  site_config { 
+    minimum_tls_version = "1.2"
+  }
+}
+
+resource "azurerm_app_service_virtual_network_swift_connection" "vnint" {
+  app_service_id = azurerm_linux_web_app.webapp2.id
+  subnet_id      = azurerm_subnet.sn1.id
+}
